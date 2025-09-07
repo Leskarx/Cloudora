@@ -7,6 +7,7 @@ import SharedFiles from './components/Pages/SharedFiles';
 import Favorites from './components/Pages/Favorites';
 import UploadFiles from './components/Pages/UploadFiles';
 import Settings from './components/Pages/Settings';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   // Authentication state - in real app, this would be managed by context/redux
@@ -43,6 +44,31 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
+      <Toaster
+  position="top-center"
+  toastOptions={{
+    duration: 3000,
+    style: {
+      background: '#333',
+      color: '#fff',
+    },
+    success: {
+      duration: 2000,
+      theme: {
+        primary: 'green',
+        secondary: 'black',
+      },
+    },
+    error: {
+      duration: 4000,
+      theme: {
+        primary: 'red',
+        secondary: 'black',
+      },
+    },
+  }}
+  reverseOrder={false}
+/>
         <Routes>
           {/* Authentication Route */}
           <Route 

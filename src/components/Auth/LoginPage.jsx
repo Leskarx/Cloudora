@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Cloud } from 'lucide-react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const LoginPage = ({ onLogin }) => {
   // State for form management
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -61,20 +64,54 @@ const LoginPage = ({ onLogin }) => {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
+    setLoading(true);
+   
+   
     if (validateForm()) {
-      // Simulate authentication - in real app, this would be an API call
-      const userData = {
-        id: 1,
-        name: isLogin ? 'John Doe' : formData.name,
-        email: formData.email,
-        avatar: '/api/placeholder/40/40'
-      };
+      const loginFormData={
+        email:formData.email,
+        password:formData.password
+      }
+      const signUpFormData={
+        name:formData.name,
+        email:formData.email,
+        password:formData.password
+      }
+     
       
-      onLogin(userData);
+  try {
+    const res=await axios.post(`${import.meta.env.VITE_API_URL}/auth/${isLogin ? 'login' : 'signup'}`, isLogin ? loginFormData : signUpFormData); 
+    if(res.status===201){
+      toast.success(res.data.message);
+     setLoading(false);
+      
     }
+  } catch (error) {
+    toast.error(error.response.data.message);
+    setLoading(false);
+    
+    
+  }
+    }
+
+
+
+    
+    
+    // if (validateForm()) {
+    //   // Simulate authentication - in real app, this would be an API call
+    //   const userData = {
+    //     id: 1,
+    //     name: isLogin ? 'John Doe' : formData.name,
+    //     email: formData.email,
+    //     avatar: '/api/placeholder/40/40'
+    //   };
+      
+    //   onLogin(userData);
+    // }
   };
 
   return (
@@ -186,11 +223,23 @@ const LoginPage = ({ onLogin }) => {
 
           {/* Submit button */}
           <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all font-medium"
-          >
-            {isLogin ? 'Sign In' : 'Create Account'}
-          </button>
+  type="submit"
+  disabled={loading}
+  className={`
+    w-full flex items-center justify-center
+    bg-blue-600 text-white py-3 px-4 rounded-lg
+    hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+    transition-all font-medium
+    ${loading ? "opacity-70 cursor-not-allowed" : ""}
+  `}
+>
+  {loading ? (
+    <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+  ) : (
+    isLogin ? "Sign In" : "Create Account"
+  )}
+</button>
+
         </form>
 
         {/* Toggle between login and signup */}
