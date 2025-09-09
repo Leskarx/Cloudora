@@ -8,16 +8,34 @@ import Favorites from './components/Pages/Favorites';
 import UploadFiles from './components/Pages/UploadFiles';
 import Settings from './components/Pages/Settings';
 import { Toaster } from 'react-hot-toast';
+import axios from 'axios';
 
 function App() {
   // Authentication state - in real app, this would be managed by context/redux
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+  async function checkAuth(){
+    try {
+      const res=await axios.get(`${import.meta.env.VITE_API_URL}/me`,{withCredentials:true});
+      if(res.status===200){
+        setIsAuthenticated(true);
+        setUser(res.data.user);
+      }
+    } catch (error) {
+       setIsAuthenticated(false);
+       setUser(null);
+     
+    }
+
+   }
 
   // Check for existing session on app load
   useEffect(() => {
     const savedAuth = localStorage.getItem('isAuthenticated');
     const savedUser = localStorage.getItem('user');
+   
+    checkAuth();
+    
     
     if (savedAuth === 'true' && savedUser) {
       setIsAuthenticated(true);
@@ -26,15 +44,34 @@ function App() {
   }, []);
 
   // Handle login
-  const handleLogin = (userData) => {
-    setIsAuthenticated(true);
-    setUser(userData);
+  const handleLogin = () => {
+    checkAuth();
+    
     localStorage.setItem('isAuthenticated', 'true');
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
   // Handle logout
   const handleLogout = () => {
+   async function logout(){
+    try {
+      const res=await axios.post(`${import.meta.env.VITE_API_URL}/auth/logout`,{},{withCredentials:true});
+      if(res.status===200){
+        console.log("logged out successfully");
+      }
+    } catch (error) {
+      console.log("Error logging out",error);
+
+    }
+ 
+
+   }
+   logout();
+      
+
+
+
+
     setIsAuthenticated(false);
     setUser(null);
     localStorage.removeItem('isAuthenticated');

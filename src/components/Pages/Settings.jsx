@@ -24,11 +24,12 @@ const Settings = ({ user, onLogout }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   // Form states
+  // console.log(user);
   const [profileData, setProfileData] = useState({
     name: user?.name || 'John Doe',
     email: user?.email || 'john.doe@example.com',
-    bio: 'Cloud storage enthusiast',
-    location: 'New York, USA'
+    bio: user?.bio||'Cloud storage enthusiast',
+    location: user?.location||'New York, USA'
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -62,6 +63,7 @@ const Settings = ({ user, onLogout }) => {
   // Handle profile update
   const handleProfileUpdate = (e) => {
     e.preventDefault();
+    
     alert('Profile updated successfully!');
   };
 
@@ -198,12 +200,13 @@ const Settings = ({ user, onLogout }) => {
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label  className="block text-sm font-medium text-gray-700 mb-2">
                               Email Address
                             </label>
                             <input
                               type="email"
                               value={profileData.email}
+                              disabled={true}
                               onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />

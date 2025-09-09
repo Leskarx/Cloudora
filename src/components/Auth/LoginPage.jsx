@@ -83,10 +83,14 @@ const LoginPage = ({ onLogin }) => {
      
       
   try {
-    const res=await axios.post(`${import.meta.env.VITE_API_URL}/auth/${isLogin ? 'login' : 'signup'}`, isLogin ? loginFormData : signUpFormData); 
+    const res=await axios.post(`${import.meta.env.VITE_API_URL}/auth/${isLogin ? 'login' : 'signup'}`, isLogin ? loginFormData : signUpFormData,
+      {withCredentials:true}
+    ); 
     if(res.status===201){
       toast.success(res.data.message);
      setLoading(false);
+    //  i need to call the login method
+    onLogin();
       
     }
   } catch (error) {
