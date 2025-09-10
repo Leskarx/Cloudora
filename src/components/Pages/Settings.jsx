@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import Sidebar from '../Layout/Sidebar';
 import Header from '../Layout/Header';
+import updateUser from '../../actions/updateUser';
 
 const Settings = ({ user, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,9 +23,13 @@ const Settings = ({ user, onLogout }) => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
+  // Loading states
+  const [loadingProfile, setLoadingProfile] = useState(false);
+  const [loadingPassword, setLoadingPassword] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
   // Form states
-  // console.log(user);
   const [profileData, setProfileData] = useState({
     name: user?.name || 'John Doe',
     email: user?.email || 'john.doe@example.com',
@@ -61,21 +66,30 @@ const Settings = ({ user, onLogout }) => {
   ];
 
   // Handle profile update
-  const handleProfileUpdate = (e) => {
+  const handleProfileUpdate = async(e) => {
     e.preventDefault();
-    
-    alert('Profile updated successfully!');
+    setLoadingProfile(true);
+    try {
+      await updateUser(profileData);
+      // alert('Profile updated successfully!');
+    } finally {
+      setLoadingProfile(false);
+    }
   };
 
   // Handle password change
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = async(e) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert('New passwords do not match!');
       return;
     }
-    alert('Password changed successfully!');
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setLoadingPassword(true);
+    setTimeout(() => {
+      alert('Password changed successfully!');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setLoadingPassword(false);
+    }, 1000);
   };
 
   // Handle profile picture upload
@@ -84,9 +98,13 @@ const Settings = ({ user, onLogout }) => {
   };
 
   // Handle account deletion
-  const handleAccountDeletion = () => {
+  const handleAccountDeletion = async () => {
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      alert('Account deletion would be processed here');
+      setLoadingDelete(true);
+      setTimeout(() => {
+        alert('Account deletion would be processed here');
+        setLoadingDelete(false);
+      }, 1000);
     }
   };
 
@@ -241,10 +259,21 @@ const Settings = ({ user, onLogout }) => {
 
                         <button
                           type="submit"
-                          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          disabled={loadingProfile}
+                          className={`
+                            flex items-center justify-center space-x-2 px-4 py-2 
+                            bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors
+                            ${loadingProfile ? "opacity-70 cursor-not-allowed" : ""}
+                          `}
                         >
-                          <Save size={16} />
-                          <span>Save Changes</span>
+                          {loadingProfile ? (
+                            <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <>
+                              <Save size={16} />
+                              <span>Save Changes</span>
+                            </>
+                          )}
                         </button>
                       </form>
                     </div>
@@ -324,10 +353,21 @@ const Settings = ({ user, onLogout }) => {
 
                         <button
                           type="submit"
-                          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          disabled={loadingPassword}
+                          className={`
+                            flex items-center justify-center space-x-2 px-4 py-2 
+                            bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors
+                            ${loadingPassword ? "opacity-70 cursor-not-allowed" : ""}
+                          `}
                         >
-                          <Lock size={16} />
-                          <span>Change Password</span>
+                          {loadingPassword ? (
+                            <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <>
+                              <Lock size={16} />
+                              <span>Change Password</span>
+                            </>
+                          )}
                         </button>
                       </form>
                     </div>
@@ -439,17 +479,28 @@ const Settings = ({ user, onLogout }) => {
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900 mb-6">Danger Zone</h2>
                       
-                      <div className="border border-red-200 rounded-lg p-6 bg-red-50">
-                        <h3 className="text-lg font-semibold text-red-900 mb-2">Delete Account</h3>
-                        <p className="text-red-700 mb-4">
+                      <div className="border border-red-200 bg-red-50 rounded-lg p-6">
+                        <h3 className="text-lg font-medium text-red-900 mb-2">Delete Account</h3>
+                        <p className="text-sm text-red-700 mb-4">
                           Once you delete your account, there is no going back. Please be certain.
                         </p>
                         <button
                           onClick={handleAccountDeletion}
-                          className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                          disabled={loadingDelete}
+                          className={`
+                            flex items-center justify-center space-x-2 px-4 py-2 
+                            bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors
+                            ${loadingDelete ? "opacity-70 cursor-not-allowed" : ""}
+                          `}
                         >
-                          <Trash2 size={16} />
-                          <span>Delete Account</span>
+                          {loadingDelete ? (
+                            <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <>
+                              <Trash2 size={16} />
+                              <span>Delete Account</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>

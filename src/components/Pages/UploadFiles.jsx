@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Upload, X, File, CheckCircle, AlertCircle } from 'lucide-react';
 import Sidebar from '../Layout/Sidebar';
 import Header from '../Layout/Header';
+import uploadFiles from '../../actions/uploadFiles';
 
 const UploadFiles = ({ user, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -36,26 +37,31 @@ const UploadFiles = ({ user, onLogout }) => {
   const handleChange = (e) => {
     e.preventDefault();
     if (e.target.files && e.target.files[0]) {
-      handleFiles(e.target.files);
+      handleFiles(e.target.files[0]);
     }
   };
 
   // Process selected files
   const handleFiles = (files) => {
-    Array.from(files).forEach((file) => {
-      const fileId = Date.now() + Math.random();
-      const fileData = {
-        id: fileId,
-        name: file.name,
-        size: formatFileSize(file.size),
-        type: file.type || 'Unknown',
-        status: 'uploading',
-        progress: 0
-      };
+    console.log(files);
+    const formData=new FormData();
+    formData.append("file",files)
+    uploadFiles(formData);
 
-      setUploadedFiles(prev => [...prev, fileData]);
-      simulateUpload(fileId);
-    });
+    // Array.from(files).forEach((file) => {
+    //   const fileId = Date.now() + Math.random();
+    //   const fileData = {
+    //     id: fileId,
+    //     name: file.name,
+    //     size: formatFileSize(file.size),
+    //     type: file.type || 'Unknown',
+    //     status: 'uploading',
+    //     progress: 0
+    //   };
+
+    //   setUploadedFiles(prev => [...prev, fileData]);
+    //   simulateUpload(fileId);
+    // });
   };
 
   // Simulate file upload with progress
