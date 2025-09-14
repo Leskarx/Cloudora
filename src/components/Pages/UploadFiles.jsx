@@ -42,11 +42,11 @@ const UploadFiles = ({ user, onLogout }) => {
   };
 
   // Process selected files
-  const handleFiles = (files) => {
+  const handleFiles = async (files) => {
     console.log(files);
     const formData=new FormData();
     formData.append("file",files)
-    uploadFiles(formData);
+    await uploadFiles(formData);
 
     // Array.from(files).forEach((file) => {
     //   const fileId = Date.now() + Math.random();

@@ -11,7 +11,7 @@ const uploadFiles=async(formData)=>{
         toast.success("File uploaded")
      }
    } catch (error) {
-    toast.error(error)
+    toast.error(error.message)
 
     
    }
