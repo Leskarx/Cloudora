@@ -100,6 +100,8 @@ const LoginPage = ({ onLogin }) => {
     
   }
     }
+    setLoading(false);
+    
 
 
 
