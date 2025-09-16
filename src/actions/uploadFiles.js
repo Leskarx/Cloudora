@@ -9,7 +9,10 @@ const uploadFiles=async(formData)=>{
      )
      if(res.status==200){
         toast.success("File uploaded")
+      //   console.log("---------------->UF",res)
+        return res;
      }
+     
    } catch (error) {
     toast.error(error.message)
 

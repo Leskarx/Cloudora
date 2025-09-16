@@ -11,66 +11,58 @@ import { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 
 function App() {
-  // Authentication state - in real app, this would be managed by context/redux
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
-  async function checkAuth(){
+  const [loading, setLoading] = useState(true); // loader to avoid flicker
+
+  // Verify user session
+  const checkAuth = async () => {
     try {
-      const res=await axios.get(`${import.meta.env.VITE_API_URL}/me`,{withCredentials:true});
-      if(res.status===200){
+      console.log("called----->");
+      
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/me`, { withCredentials: true });
+      if (res.status === 200 && res.data.user) {
         setIsAuthenticated(true);
         setUser(res.data.user);
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('user', JSON.stringify(res.data.user));
       }
     } catch (error) {
-       setIsAuthenticated(false);
-       setUser(null);
-     
+      handleLogout(false); // don't call API again, just clear
+    } finally {
+      setLoading(false);
     }
+  };
 
-   }
+  // update user state and localStorage
 
-  // Check for existing session on app load
+
+  // Restore session from localStorage first
   useEffect(() => {
     const savedAuth = localStorage.getItem('isAuthenticated');
     const savedUser = localStorage.getItem('user');
-   
-    checkAuth();
-    
-    
+
     if (savedAuth === 'true' && savedUser) {
       setIsAuthenticated(true);
       setUser(JSON.parse(savedUser));
     }
+
+    // Validate in background
+    checkAuth();
   }, []);
 
-  // Handle login
-  const handleLogin = () => {
-    checkAuth();
-    
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('user', JSON.stringify(userData));
+  const handleLogin = async () => {
+    await checkAuth(); // re-check after login
   };
 
-  // Handle logout
-  const handleLogout = () => {
-   async function logout(){
-    try {
-      const res=await axios.post(`${import.meta.env.VITE_API_URL}/auth/logout`,{},{withCredentials:true});
-      if(res.status===200){
-        console.log("logged out successfully");
+  const handleLogout = async (callApi = true) => {
+    if (callApi) {
+      try {
+        await axios.post(`${import.meta.env.VITE_API_URL}/auth/logout`, {}, { withCredentials: true });
+      } catch (error) {
+        console.log("Error logging out", error);
       }
-    } catch (error) {
-      console.log("Error logging out",error);
-
     }
- 
-
-   }
-   logout();
-      
-
-
-
 
     setIsAuthenticated(false);
     setUser(null);
@@ -78,112 +70,93 @@ function App() {
     localStorage.removeItem('user');
   };
 
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>; // Optional loader
+  }
+
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
-      <Toaster
-  position="top-center"
-  toastOptions={{
-    duration: 3000,
-    style: {
-      background: '#333',
-      color: '#fff',
-    },
-    success: {
-      duration: 2000,
-      theme: {
-        primary: 'green',
-        secondary: 'black',
-      },
-    },
-    error: {
-      duration: 4000,
-      theme: {
-        primary: 'red',
-        secondary: 'black',
-      },
-    },
-  }}
-  reverseOrder={false}
-/>
+        <Toaster position="top-center" toastOptions={{ duration: 3000 }} reverseOrder={false} />
+
         <Routes>
           {/* Authentication Route */}
-          <Route 
-            path="/login" 
+          <Route
+            path="/login"
             element={
               !isAuthenticated ? (
                 <LoginPage onLogin={handleLogin} />
               ) : (
                 <Navigate to="/" replace />
               )
-            } 
+            }
           />
-          
+
           {/* Protected Routes */}
-          <Route 
-            path="/" 
+          <Route
+            path="/"
             element={
               isAuthenticated ? (
                 <Dashboard user={user} onLogout={handleLogout} />
               ) : (
                 <Navigate to="/login" replace />
               )
-            } 
+            }
           />
-          
-          <Route 
-            path="/category/:categoryName" 
+
+          <Route
+            path="/category/:categoryName"
             element={
               isAuthenticated ? (
                 <CategoryPage user={user} onLogout={handleLogout} />
               ) : (
                 <Navigate to="/login" replace />
               )
-            } 
+            }
           />
-          
-          <Route 
-            path="/shared-files" 
+
+          <Route
+            path="/shared-files"
             element={
               isAuthenticated ? (
                 <SharedFiles user={user} onLogout={handleLogout} />
               ) : (
                 <Navigate to="/login" replace />
               )
-            } 
+            }
           />
-          
-          <Route 
-            path="/favorites" 
+
+          <Route
+            path="/favorites"
             element={
               isAuthenticated ? (
                 <Favorites user={user} onLogout={handleLogout} />
               ) : (
                 <Navigate to="/login" replace />
               )
-            } 
+            }
           />
-          
-          <Route 
-            path="/upload" 
+
+          <Route
+            path="/upload"
             element={
               isAuthenticated ? (
-                <UploadFiles user={user} onLogout={handleLogout} />
+                <UploadFiles setUser={setUser} user={user} onLogout={handleLogout} />
               ) : (
                 <Navigate to="/login" replace />
               )
-            } 
+            }
           />
-          
-          <Route 
-            path="/settings" 
+
+          <Route
+            path="/settings"
             element={
               isAuthenticated ? (
                 <Settings user={user} onLogout={handleLogout} />
               ) : (
                 <Navigate to="/login" replace />
               )
-            } 
+            }
           />
         </Routes>
       </div>
